@@ -1,0 +1,498 @@
+<!doctype html>
+<html lang="id" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Surprise Messenger 💌</title>
+
+    <!-- Google Fonts: Poppins, Playfair Display, Quicksand, Caveat -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Playfair+Display:ital,wght@0,600;1,600&family=Quicksand:wght@500;700&family=Caveat:wght@500;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Tailwind CSS (CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Tailwind Configuration -->
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              poppins: ["Poppins", "sans-serif"],
+              playfair: ["Playfair Display", "serif"],
+              quicksand: ["Quicksand", "sans-serif"],
+              caveat: ["Caveat", "cursive"],
+            },
+            colors: {
+              "soft-pink": "#FFD1DC",
+              "lavender-purple": "#E6E6FA",
+            },
+            animation: {
+              "fade-up": "fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards",
+              "pulse-slow": "pulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+              "bounce-subtle": "bounceSubtle 2s infinite",
+            },
+            keyframes: {
+              fadeUp: {
+                "0%": { opacity: "0", transform: "translateY(20px)" },
+                "100%": { opacity: "1", transform: "translateY(0)" },
+              },
+              bounceSubtle: {
+                "0%, 100%": { transform: "translateY(-5%)" },
+                "50%": { transform: "translateY(0)" },
+              },
+            },
+          },
+        },
+      };
+    </script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body
+    class="h-screen w-full flex items-center justify-center relative selection:bg-soft-pink selection:text-white"
+  >
+    <!-- Hearts Container -->
+    <div
+      id="heartsContainer"
+      class="fixed inset-0 pointer-events-none overflow-hidden z-[5]"
+    ></div>
+
+    <!-- Audio Element (The Walters - I Love You So) -->
+    <audio id="bgMusic" loop preload="none">
+      <source src="audio/ilys.mp3" />
+      Browser kamu tidak mendukung pemutar audio.
+    </audio>
+
+    <!-- Component 1: The Entry Gate -->
+    <div
+      id="entryGate"
+      class="absolute inset-0 bg-white z-50 flex items-center justify-center transition-opacity duration-1000 ease-in-out"
+    >
+      <button
+        id="startButton"
+        class="group flex flex-col items-center gap-6 cursor-pointer transform hover:scale-105 transition-transform duration-300 focus:outline-none"
+      >
+        <div
+          class="animate-pulse-slow text-7xl drop-shadow-[0_0_15px_rgba(255,209,220,0.8)] transition-transform group-hover:rotate-[10deg]"
+        >
+          💌
+        </div>
+        <div
+          class="px-8 py-4 bg-white/80 backdrop-blur-md rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-soft-pink/40 text-gray-700 font-semibold text-lg hover:bg-soft-pink/20 hover:border-soft-pink transition-all duration-300"
+        >
+          Ada pesan buat kamu...
+        </div>
+      </button>
+    </div>
+
+    <!-- Component 2: The Animated Chat Interface -->
+    <div
+      id="chatInterface"
+      class="hidden opacity-0 w-full max-w-[380px] h-[650px] max-h-[90vh] mx-4 rounded-3xl bg-white/30 backdrop-blur-md border border-white/60 shadow-[0_20px_50px_rgba(0,0,0,0.1)] flex flex-col transition-all duration-1000 ease-in-out p-5 relative overflow-hidden"
+    >
+      <!-- Header Profile -->
+      <div
+        class="flex items-center gap-4 border-b border-white/50 pb-4 mb-5 shrink-0"
+      >
+        <div
+          class="w-12 h-12 rounded-full bg-gradient-to-tr from-soft-pink to-lavender-purple flex items-center justify-center text-2xl shadow-inner border-2 border-white"
+        >
+          🧑‍💼
+        </div>
+        <div class="flex flex-col">
+          <h2 class="font-semibold text-gray-800 text-lg leading-tight">
+            anomali
+          </h2>
+          <div class="flex items-center gap-1.5 mt-0.5">
+            <span
+              class="w-2 h-2 rounded-full bg-green-400 animate-pulse"
+            ></span>
+            <p class="text-xs text-gray-500 font-medium tracking-wide">
+              Online
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Messages Container -->
+      <div
+        id="messagesContainer"
+        class="flex-1 overflow-y-auto no-scrollbar flex flex-col gap-5 pb-24 relative"
+      >
+        <!-- Messages dynamically injected here -->
+      </div>
+
+      <!-- Component 4: The Final Action Button -->
+      <div
+        id="actionContainer"
+        class="absolute bottom-6 left-0 w-full px-6 flex justify-center opacity-0 pointer-events-none transition-all duration-1000 translate-y-4"
+      >
+        <button
+          id="lanjutButton"
+          class="w-full py-3.5 bg-gradient-to-r from-soft-pink to-lavender-purple rounded-2xl text-gray-800 font-semibold shadow-[0_10px_20px_rgba(230,230,250,0.5)] hover:shadow-[0_15px_25px_rgba(255,209,220,0.6)] hover:scale-[1.02] active:scale-95 transition-all duration-300 animate-bounce-subtle border border-white/60"
+        >
+          Lanjut ✨
+        </button>
+      </div>
+    </div>
+
+    <!-- Component 5: Phase 2 & 3 Container -->
+    <div
+      id="phase2Container"
+      class="hidden absolute inset-0 z-40 overflow-y-auto overflow-x-hidden no-scrollbar transition-opacity duration-1000 opacity-0"
+    >
+      <!-- Phase 2: Siapa itu Nindy? -->
+      <div
+        class="w-full min-h-screen flex flex-col items-center justify-center p-4"
+      >
+        <!-- The Card -->
+        <div
+          id="nindyCard"
+          class="w-full max-w-[380px] h-[600px] max-h-[90vh] bg-gradient-to-br from-[#FFD1DC]/40 to-[#E6E6FA]/40 bg-white/40 backdrop-blur-xl border border-pink-200 rounded-[2.5rem] shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] flex flex-col items-center justify-center p-8 relative cursor-pointer overflow-hidden transition-all duration-500 shrink-0"
+        >
+          <!-- Initial Question -->
+          <h1
+            id="initialQuestion"
+            class="font-quicksand text-4xl font-bold text-gray-800 text-center animate-pulse tracking-wide transition-opacity duration-500"
+          >
+            siapa itu nindy?
+          </h1>
+
+          <!-- Main Content (Hidden initially) -->
+          <div
+            id="cardContent"
+            class="hidden flex-col items-center justify-between w-full h-full opacity-0 transition-opacity duration-700"
+          >
+            <!-- Title -->
+            <h2
+              class="font-playfair text-[2.5rem] text-gray-800 text-center mt-6 drop-shadow-sm"
+            >
+              Nindy Afisa
+            </h2>
+
+            <!-- Sentences Container -->
+            <div
+              id="sentenceDisplay"
+              class="flex-1 flex flex-col justify-center text-center w-full my-8 px-2"
+            >
+              <!-- Sentences injected via JS -->
+            </div>
+
+            <!-- Progress & Hint -->
+            <div
+              class="flex flex-col items-center justify-center mb-4 w-full gap-3"
+            >
+              <p
+                class="text-xs text-gray-500 font-quicksand opacity-70 animate-bounce tracking-wide"
+              >
+                Ketuk layar untuk lanjut
+              </p>
+              <div
+                class="bg-white/60 px-5 py-1.5 rounded-full backdrop-blur-md border border-white/60 shadow-sm"
+              >
+                <span
+                  id="progressIndicator"
+                  class="font-quicksand text-sm font-bold text-pink-400"
+                  >1/10</span
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Scroll Down Hint (Hidden initially, shown after 10th sentence) -->
+        <div
+          id="scrollHint"
+          class="mt-8 hidden flex flex-col items-center opacity-0 transition-opacity duration-1000"
+        >
+          <p
+            class="font-quicksand text-gray-500 mb-2 font-medium text-sm tracking-wide"
+          >
+            Scroll ke bawah
+          </p>
+          <div
+            class="w-[26px] h-[42px] border-2 border-gray-400 rounded-[20px] flex justify-center pt-[6px] shadow-sm bg-white/50 backdrop-blur-sm"
+          >
+            <div
+              class="w-1.5 h-2.5 bg-pink-400 rounded-full animate-bounce"
+            ></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phase 3: Polaroid Gallery -->
+      <div
+        id="polaroidGallery"
+        class="relative w-full max-w-5xl mx-auto px-4 pb-20 pt-10 hidden opacity-0 transition-opacity duration-1000"
+      >
+        <!-- Paper Texture Overlay for Gallery -->
+        <div
+          class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cream-paper.png')] opacity-30 pointer-events-none -z-10 mix-blend-multiply"
+        ></div>
+
+        <h2
+          class="font-playfair text-3xl md:text-4xl text-center text-gray-800 mb-12 drop-shadow-sm"
+        >
+          Memory Lane
+        </h2>
+
+        <div
+          class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8"
+          id="polaroidGrid"
+        >
+          <!-- Polaroids will be injected by JS -->
+        </div>
+      </div>
+
+      <!-- Phase 4: 3 Praise Cards -->
+      <div
+        id="praiseSection"
+        class="w-full max-w-5xl mx-auto px-4 pb-32 pt-10 hidden opacity-0 transition-opacity duration-1000"
+      >
+        <h2
+          class="font-playfair text-3xl md:text-4xl text-center text-gray-800 mb-12 drop-shadow-sm"
+        >
+          Tiga Hal Tentangmu
+        </h2>
+
+        <div
+          class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8"
+          id="praiseCardsContainer"
+        >
+          <!-- Card 1 -->
+          <div
+            class="praise-card opacity-0 transform translate-y-12 transition-all duration-[800ms] ease-out bg-white/40 backdrop-blur-xl border border-pink-200 rounded-[2rem] p-8 shadow-[0_8px_32px_0_rgba(31,38,135,0.1)] text-center hover:-translate-y-2 hover:shadow-xl hover:bg-white/50 cursor-default"
+          >
+            <div class="text-4xl mb-4">✨</div>
+            <h3 class="font-playfair text-2xl text-gray-800 font-bold mb-3">
+              Rona Keanggunan
+            </h3>
+            <p class="font-quicksand text-gray-700 leading-relaxed">
+              Parasmu bukanlah semata wujud raga, melainkan paduan harmoni yang
+              merasuk ke dalam jiwa. Di hadapmu, segala hiruk-pikuk mereda,
+              menuntunku pada kekaguman yang tak berkesudahan.
+            </p>
+          </div>
+          <!-- Card 2 -->
+          <div
+            class="praise-card opacity-0 transform translate-y-12 transition-all duration-[800ms] ease-out bg-white/40 backdrop-blur-xl border border-pink-200 rounded-[2rem] p-8 shadow-[0_8px_32px_0_rgba(31,38,135,0.1)] text-center hover:-translate-y-2 hover:shadow-xl hover:bg-white/50 cursor-default"
+            style="transition-delay: 150ms"
+          >
+            <div class="text-4xl mb-4">🌸</div>
+            <h3 class="font-playfair text-2xl text-gray-800 font-bold mb-3">
+              Pelita Kelembutan
+            </h3>
+            <p class="font-quicksand text-gray-700 leading-relaxed">
+              Ketulusan di relung hatimu menetes serupa embun pagi, menyejukkan
+              tanpa perlu bersuara. Kasih yang kau pancarkan senantiasa menjadi
+              lentera teduh bagi siapa pun di dekatmu.
+            </p>
+          </div>
+          <!-- Card 3 -->
+          <div
+            class="praise-card opacity-0 transform translate-y-12 transition-all duration-[800ms] ease-out bg-white/40 backdrop-blur-xl border border-pink-200 rounded-[2rem] p-8 shadow-[0_8px_32px_0_rgba(31,38,135,0.1)] text-center hover:-translate-y-2 hover:shadow-xl hover:bg-white/50 cursor-default"
+            style="transition-delay: 300ms"
+          >
+            <div class="text-4xl mb-4">💖</div>
+            <h3 class="font-playfair text-2xl text-gray-800 font-bold mb-3">
+              Muara Peristirahatan
+            </h3>
+            <p class="font-quicksand text-gray-700 leading-relaxed">
+              Saat badai hari menumbuk resah, keberadaanmu menjadi satu-satunya
+              tempat merengkuh damai. Engkaulah muara di mana segala penat
+              berpulang dan jiwaku menemukan genapnya.
+            </p>
+          </div>
+        </div>
+
+        <!-- Fun Text Break -->
+        <div
+          class="mt-20 text-center praise-card opacity-0 transform translate-y-12 transition-all duration-[800ms] ease-out"
+          style="transition-delay: 500ms"
+        >
+          <p
+            class="font-quicksand italic font-medium text-gray-500 text-lg md:text-xl tracking-wide"
+          >
+            amboy jadi sastrawan gini 🤭
+          </p>
+        </div>
+
+        <!-- Phase 5: Cat Stickers Cards -->
+        <div
+          class="mt-20 grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8"
+          id="catStickersContainer"
+        >
+          <!-- Stiker Kucing akan dimunculkan oleh script.js -->
+        </div>
+
+        <!-- Phase 6: Cute Game -->
+        <div
+          id="gameSection"
+          class="mt-32 mb-20 w-full flex flex-col items-center justify-center opacity-0 transform translate-y-12 transition-all duration-[800ms] ease-out"
+        >
+          <div
+            id="gameCard"
+            class="bg-white/40 backdrop-blur-xl border border-pink-200 rounded-[2rem] p-8 md:p-12 shadow-[0_8px_32px_0_rgba(31,38,135,0.1)] text-center relative max-w-md w-full min-h-[300px] flex flex-col justify-center"
+          >
+            <h2
+              class="font-playfair text-3xl text-gray-800 font-bold mb-4 mt-2"
+            >
+              Satu Pertanyaan Terakhir...
+            </h2>
+            <p class="font-quicksand text-xl text-gray-700 mb-8">
+              Seberapa sayang Nindy sama aku?
+            </p>
+
+            <div
+              class="flex justify-center gap-4 w-full mt-4 h-[60px]"
+              id="btnContainer"
+            >
+              <button
+                id="btnYes"
+                class="px-6 py-3 h-[50px] bg-gradient-to-r from-pink-400 to-pink-500 text-white font-quicksand font-bold rounded-full shadow-lg hover:scale-110 hover:shadow-pink-300/50 transition-transform duration-300 z-10 shrink-0"
+              >
+                Sayang Banget! 💖
+              </button>
+              <button
+                id="btnNo"
+                class="px-6 py-3 h-[50px] bg-white text-gray-500 font-quicksand font-bold rounded-full shadow-sm border border-gray-200 transition-all duration-200 z-10 shrink-0"
+              >
+                Biasa Aja 😜
+              </button>
+            </div>
+
+            <!-- Hidden Success Message -->
+            <div
+              id="gameSuccess"
+              class="hidden absolute inset-0 bg-white/95 backdrop-blur-md rounded-[2rem] flex flex-col items-center justify-center p-6 transition-opacity duration-500 opacity-0 z-20"
+            >
+              <div class="text-7xl mb-4 animate-bounce">🥰</div>
+              <h3 class="font-playfair text-3xl text-pink-500 font-bold mb-3">
+                Yeayyy!
+              </h3>
+              <p class="font-quicksand text-lg text-gray-700 font-medium">
+                Aku juga sayaanggg banget sama Nindy! ❤️❤️
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Phase 7: Score Game (Tangkap Hati) -->
+        <div
+          id="scoreGameSection"
+          class="mt-24 mb-32 w-full flex flex-col items-center justify-center opacity-0 transform translate-y-12 transition-all duration-[800ms] ease-out"
+        >
+          <div
+            class="bg-white/40 backdrop-blur-xl border border-pink-200 rounded-[2rem] p-6 md:p-10 shadow-[0_8px_32px_0_rgba(31,38,135,0.1)] text-center relative max-w-md w-full"
+          >
+            <h2 class="font-playfair text-3xl text-gray-800 font-bold mb-2">
+              Tangkap Cintaku! 🏃‍♀️
+            </h2>
+            <p class="font-quicksand text-gray-600 mb-6 text-sm md:text-base">
+              Kumpulkan minimal 15 hati dalam 15 detik!
+            </p>
+
+            <div
+              class="flex justify-between items-center mb-6 px-5 bg-white/60 rounded-full py-2.5 border border-pink-100 shadow-sm"
+            >
+              <div class="font-quicksand font-bold text-gray-700">
+                Waktu: <span id="timeLeft" class="text-pink-500">15</span>s
+              </div>
+              <div class="font-quicksand font-bold text-gray-700">
+                Skor:
+                <span id="gameScore" class="text-pink-500 text-xl">0</span>
+              </div>
+            </div>
+
+            <!-- Game Board 3x3 -->
+            <div
+              class="grid grid-cols-3 gap-3 mx-auto w-[240px] h-[240px] mb-6 relative"
+            >
+              <!-- Overlay for start -->
+              <div
+                id="gameStartOverlay"
+                class="absolute inset-0 bg-white/80 backdrop-blur-sm z-10 flex flex-col items-center justify-center rounded-xl"
+              >
+                <button
+                  id="btnStartGame"
+                  class="px-6 py-2.5 bg-gradient-to-r from-pink-400 to-pink-500 text-white font-quicksand font-bold rounded-full shadow-lg hover:scale-105 transition-transform"
+                >
+                  Mulai Main!
+                </button>
+              </div>
+
+              <!-- 9 Cells -->
+              <div
+                class="game-cell bg-white/50 rounded-xl border border-pink-100 shadow-sm flex items-center justify-center text-4xl cursor-pointer hover:bg-pink-50 transition-colors select-none"
+              ></div>
+              <div
+                class="game-cell bg-white/50 rounded-xl border border-pink-100 shadow-sm flex items-center justify-center text-4xl cursor-pointer hover:bg-pink-50 transition-colors select-none"
+              ></div>
+              <div
+                class="game-cell bg-white/50 rounded-xl border border-pink-100 shadow-sm flex items-center justify-center text-4xl cursor-pointer hover:bg-pink-50 transition-colors select-none"
+              ></div>
+              <div
+                class="game-cell bg-white/50 rounded-xl border border-pink-100 shadow-sm flex items-center justify-center text-4xl cursor-pointer hover:bg-pink-50 transition-colors select-none"
+              ></div>
+              <div
+                class="game-cell bg-white/50 rounded-xl border border-pink-100 shadow-sm flex items-center justify-center text-4xl cursor-pointer hover:bg-pink-50 transition-colors select-none"
+              ></div>
+              <div
+                class="game-cell bg-white/50 rounded-xl border border-pink-100 shadow-sm flex items-center justify-center text-4xl cursor-pointer hover:bg-pink-50 transition-colors select-none"
+              ></div>
+              <div
+                class="game-cell bg-white/50 rounded-xl border border-pink-100 shadow-sm flex items-center justify-center text-4xl cursor-pointer hover:bg-pink-50 transition-colors select-none"
+              ></div>
+              <div
+                class="game-cell bg-white/50 rounded-xl border border-pink-100 shadow-sm flex items-center justify-center text-4xl cursor-pointer hover:bg-pink-50 transition-colors select-none"
+              ></div>
+              <div
+                class="game-cell bg-white/50 rounded-xl border border-pink-100 shadow-sm flex items-center justify-center text-4xl cursor-pointer hover:bg-pink-50 transition-colors select-none"
+              ></div>
+            </div>
+
+            <!-- Game Result Message -->
+            <div
+              id="gameResult"
+              class="hidden flex flex-col items-center animate-fade-up min-h-[60px] justify-center"
+            >
+              <p
+                id="gameResultMessage"
+                class="font-quicksand font-bold text-[1.1rem] leading-snug text-pink-500"
+              ></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Phase 8: Starry Night (Matikan Lampu) -->
+        <div id="starryNightSection" class="mt-12 w-full flex flex-col items-center justify-center opacity-0 transform translate-y-12 transition-all duration-[800ms] ease-out pb-32">
+            <p class="font-quicksand text-gray-500 mb-4 italic text-sm">Ada satu hal terakhir...</p>
+            <button id="btnSwitchLight" class="w-16 h-16 rounded-full bg-white border border-gray-200 shadow-md flex items-center justify-center text-3xl hover:bg-gray-100 hover:scale-105 hover:shadow-lg transition-all focus:outline-none">
+                💡
+            </button>
+            <p class="font-quicksand text-gray-500 mt-4 text-xs font-bold tracking-widest uppercase animate-pulse">Matikan Lampu</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- The Dark Universe -->
+    <div id="darkOverlay" class="fixed inset-0 bg-[#050515] z-[100] transition-opacity duration-[2000ms] ease-in-out opacity-0 pointer-events-none overflow-y-auto overflow-x-hidden no-scrollbar scroll-smooth">
+        <!-- Fixed Stars Container -->
+        <div id="starsContainer" class="fixed inset-0 pointer-events-none"></div>
+        
+        <!-- The Planets Content -->
+        <div id="darkUniverseContent" class="relative z-10 w-full flex flex-col hidden opacity-0 transition-opacity duration-1000 pb-20">
+            <!-- Diisi oleh JS -->
+        </div>
+    </div>
+
+    <!-- Script Logic -->
+    <script src="script.js"></script>
+  </body>
+</html>
